@@ -1,7 +1,9 @@
 import * as types from './constant'
 import { actions } from '../'
 import AsyncStorage from '@react-native-community/async-storage'
-import { concatSeries } from 'async'
+import { concatSeries } from 'async';
+import { apiClient } from "../../../apiClient/index";
+
 /**
 * Sign in.
 * @param {string} username 
@@ -13,32 +15,31 @@ export const login = (username, password) => {
   return dispatch => {
     dispatch(actions.app.loading())
     setTimeout( async () => {
-      if (username === 'admin' && password === 'secret') {
-       
-        await AsyncStorage.setItem('userData',username);
-        let userValid = '';
-        const data = {"records": { "emis_username": "state", "emis_password": "spdssa2018" } }
+      console.log(username, password, '------');
+      let userValid = '';  
+      const data = {"records": { "emis_username": username, "emis_password": password } }
+      let response = apiClient
+        .post("login", { data })
+        .then(response => {
+          const {
+            token,
+          } = response.data;
         
-        let response = await fetch('https://emislogin.tnschools.gov.in/emis_login/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-             Authorization :'EMIS_web@2019_api'
-          },
-          body: JSON.stringify(data)
-        });
-        console.log(response, '-------response');
-        dispatch({
-          type: types.LOGIN,
-          
-          payload: {
-            userId: username,
-            fullName: 'CEO LOGIN',
-            userStored:userValid
-          }
+          apiClient.defaults.headers.common.Authorization = token;
+          AsyncStorage.setItem("token", token);
         })
-      }
-      // turn loading animation off
+        .catch(error => {
+          console.log(error, '-------');
+          dispatch({
+            type: types.LOGIN,
+            payload: {
+              userId: username,
+              fullName: 'CEO LOGIN',
+              userStored:userValid
+            }
+          })
+        });
+        console.log(response, '--------responsexxx')
       dispatch(actions.app.loading(false))
     }, 3000)
   }
