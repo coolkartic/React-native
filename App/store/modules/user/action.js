@@ -15,7 +15,7 @@ export const login = (username, password) => {
   return dispatch => {
     dispatch(actions.app.loading())
     setTimeout( async () => {
-      console.log(username, password, '------');
+      // console.log(username, password, '------');
       let userValid = '';  
       const data = {"records": { "emis_username": username, "emis_password": password } }
       let response = apiClient
@@ -29,7 +29,7 @@ export const login = (username, password) => {
           AsyncStorage.setItem("token", token);
         })
         .catch(error => {
-          console.log(error, '-------');
+          // console.log(error, '-------');
           dispatch({
             type: types.LOGIN,
             payload: {
